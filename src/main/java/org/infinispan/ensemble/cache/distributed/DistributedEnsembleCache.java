@@ -1,8 +1,11 @@
 package org.infinispan.ensemble.cache.distributed;
 
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.commons.CacheException;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.commons.util.concurrent.NotifyingFutureImpl;
+import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.cache.distributed.partitioning.Partitioner;
 
@@ -212,5 +215,39 @@ public class DistributedEnsembleCache<K,V> extends EnsembleCache<K,V> {
       }
    }
 
+
+
+   /// In this implementation s will be the script and not the key referring to the script
+  /* @Override
+   public <T> T execute(String script, Map<String, ?> map){
+      //Pour faire de façon compatible, il faut recuperer le EnsembleCacheManager ici, mais je vois pas comment
+      ArrayList<T> ret = null;
+      for (Site site : this.sites()){
+         RemoteCache<String, String> scriptCache = site.getManager().getCache("___script_cache");
+         scriptCache.put("___script.js",script );
+         RemoteCache<K,V> siteCache = site.getManager().getCache();
+         ret.add( siteCache.execute("___script.js",map));
+      }
+      return ret.get(0); // FIX ME
+      //La valeur de retour est au hazard ( :'( )
+   }
+*/
+   public <T> Vector<T> execute2(String script, String scriptName,String paramKey){
+      //Pour faire de façon compatible, il faut recuperer le EnsembleCacheManager ici, mais je vois pas comment
+      Vector<T> resVec = new Vector<>();
+      T res;
+
+      for (Site site : this.sites()){
+         RemoteCache<String, String> scriptCache = site.getManager().getCache("___script_cache");
+         scriptCache.put(scriptName,script );
+         RemoteCache<K,V> siteCache = site.getManager().getCache();
+         res = siteCache.execute(scriptName,(Map<String, ?>) siteCache.get(paramKey));
+         resVec.add(res);
+      }
+      return resVec;
+   }
+
+
+/**/
 
 }
