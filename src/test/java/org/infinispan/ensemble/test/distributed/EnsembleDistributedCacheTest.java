@@ -1,6 +1,8 @@
 package org.infinispan.ensemble.test.distributed;
 
 import example.avro.WebPage;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.cache.distributed.DistributedEnsembleCache;
@@ -9,8 +11,8 @@ import org.infinispan.ensemble.cache.distributed.partitioning.Partitioner;
 import org.infinispan.ensemble.test.EnsembleCacheBaseTest;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.rmi.Remote;
+import java.util.*;
 
 import static org.infinispan.avro.hotrod.Utils.somePage;
 
@@ -47,6 +49,7 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
       cache().put(page1.getKey(),page1);
       assert frontierMode || cache().containsKey(page1.getKey());
       assert frontierMode || cache().get(page1.getKey()).equals(page1);
+
 
       // putIfAbsent
       for(int i=0; i<1000; i++){
@@ -93,5 +96,35 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
       if (frontierMode && numberOfSites()==1)
          super.split();
    }
+
+
+    @Test
+    public void execution(){
+        String script = "multiplicand  * multiplied ";
+        String scriptName = "script.js";
+
+        int i = 0;
+
+        for (Site site : cache.sites()){
+            i++;
+            Map<String,Integer> params = new HashMap<>();
+            params.put("multiplicand",i);
+            params.put("multiplier",i+5);
+            RemoteCacheManager cacheManager = site.getManager();
+            RemoteCache<String,Map<String,Integer>> valuesCache = site.getCache();
+            valuesCache.put("params",params);
+        }
+
+        Vector<Integer> vector =  cache.execute2(script,scriptName,"params");
+        Integer num = 0;
+        for (Integer res : vector){
+
+            System.out.println("Resultat numero " + num + ":  " + res + "\n\n");
+            num++;
+        }
+
+
+
+    }
 
 }
