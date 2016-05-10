@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 import java.rmi.Remote;
 import java.util.*;
 
-import static org.infinispan.avro.hotrod.Utils.somePage;
 import static org.infinispan.ensemble.EnsembleCacheManager.SCRIPT_CACHE;
 
 /**

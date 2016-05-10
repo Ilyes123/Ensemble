@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import static org.infinispan.avro.hotrod.Utils.somePage;
 import static org.testng.Assert.assertEquals;
 
 
@@ -197,5 +196,9 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
       cacheNames.add(cacheName);
       return cacheNames;
    }
-   
+
+   public static WebPage somePage(){
+      return WebPage.newBuilder().build();
+   }
+
 }
