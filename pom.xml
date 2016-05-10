@@ -19,7 +19,7 @@
 
     <properties>
         <version.infinispan>7.2.5.Final</version.infinispan>
-        <version.avro-infinispan>1.1.Final</version.avro-infinispan>
+        <version.avro-infinispan>7.2.5.Final</version.avro-infinispan>
     </properties>
 
     <dependencies>
