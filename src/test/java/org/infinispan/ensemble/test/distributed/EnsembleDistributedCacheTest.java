@@ -3,11 +3,13 @@ package org.infinispan.ensemble.test.distributed;
 import example.avro.WebPage;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.cache.distributed.DistributedEnsembleCache;
 import org.infinispan.ensemble.cache.distributed.partitioning.HashBasedPartitioner;
 import org.infinispan.ensemble.cache.distributed.partitioning.Partitioner;
+import org.infinispan.ensemble.cache.replicated.ReplicatedEnsembleCache;
 import org.infinispan.ensemble.test.EnsembleCacheBaseTest;
 import org.testng.annotations.Test;
 
@@ -15,6 +17,7 @@ import java.rmi.Remote;
 import java.util.*;
 
 import static org.infinispan.avro.hotrod.Utils.somePage;
+import static org.infinispan.ensemble.EnsembleCacheManager.SCRIPT_CACHE;
 
 /**
  * @author Pierre Sutra
@@ -105,25 +108,18 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
 
         int i = 0;
 
-        for (Site site : cache.sites()){
-            i++;
-            Map<String,Integer> params = new HashMap<>();
-            params.put("multiplicand",i);
-            params.put("multiplier",i+5);
-            RemoteCacheManager cacheManager = site.getManager();
-            RemoteCache<String,Map<String,Integer>> valuesCache = site.getCache();
-            valuesCache.put("params",params);
-        }
+        Map<String,Integer> params = new HashMap<>();
+        params.put("multiplicand",i);
+        params.put("multiplier",i+5);
 
-        Vector<Integer> vector =  cache.execute2(script,scriptName,"params");
+        EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
+        scriptCache.put(scriptName,script);
+        Vector<Integer> vector =  cache.execute(script,params);
         Integer num = 0;
         for (Integer res : vector){
-
             System.out.println("Resultat numero " + num + ":  " + res + "\n\n");
             num++;
         }
-
-
 
     }
 

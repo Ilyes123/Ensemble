@@ -1,13 +1,17 @@
 package org.infinispan.ensemble;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.infinispan.avro.client.Support;
+import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.client.hotrod.impl.ConfigurationProperties;
 import org.infinispan.commons.CacheException;
+import org.infinispan.commons.api.BasicCache;
 import org.infinispan.commons.api.BasicCacheContainer;
 import org.infinispan.commons.marshall.Marshaller;
 import org.infinispan.ensemble.cache.EnsembleCache;
+import org.infinispan.ensemble.cache.SiteEnsembleCache;
 import org.infinispan.ensemble.cache.distributed.DistributedEnsembleCache;
 import org.infinispan.ensemble.cache.distributed.partitioning.HashBasedPartitioner;
 import org.infinispan.ensemble.cache.distributed.partitioning.Partitioner;
@@ -30,6 +34,7 @@ public class EnsembleCacheManager implements  BasicCacheContainer{
    private static final Log log = LogFactory.getLog(EnsembleCacheManager.class);
 
    private static final String ENSEMBLE_INDEX = "__ENSEMBLE_INDEX";
+   public static final String SCRIPT_CACHE = "__script_cache";
    public static int DEFAULT_REPLICATION_FACTOR = 1;
    public static enum Consistency {
       SWMR,
@@ -101,6 +106,10 @@ public class EnsembleCacheManager implements  BasicCacheContainer{
       }
 
       this.caches = new ConcurrentHashMap<>();
+      List<EnsembleCache> list = new ArrayList<>();
+      for (Site s : sites())
+         list.add(s.getCache(SCRIPT_CACHE));
+      this.caches.put(SCRIPT_CACHE,new MWMREnsembleCache(SCRIPT_CACHE,list));
    }
 
    //

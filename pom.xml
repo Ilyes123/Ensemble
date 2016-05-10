@@ -19,6 +19,7 @@
 
     <properties>
         <version.infinispan>7.2.5.Final</version.infinispan>
+        <version.avro-infinispan>1.1.Final</version.avro-infinispan>
     </properties>
 
     <dependencies>
@@ -31,8 +32,14 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>infinispan-avro-hotrod</artifactId>
+            <artifactId>infinispan-scripting</artifactId>
             <version>${version.infinispan}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>infinispan-avro-hotrod</artifactId>
+            <version>${version.avro-infinispan}</version>
         </dependency>
 
         <dependency>
@@ -93,7 +100,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>infinispan-avro-hotrod</artifactId>
-            <version>${version.infinispan}</version>
+            <version>${version.avro-infinispan}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -101,7 +108,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>infinispan-avro-server</artifactId>
-            <version>${version.infinispan}</version>
+            <version>${version.avro-infinispan}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -109,14 +116,14 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>infinispan-avro-server</artifactId>
-            <version>${version.infinispan}</version>
+            <version>${version.avro-infinispan}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>infinispan-avro-client</artifactId>
-            <version>${version.infinispan}</version>
+            <version>${version.avro-infinispan}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
