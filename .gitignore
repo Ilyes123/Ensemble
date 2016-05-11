@@ -3,3 +3,4 @@ infinispan-ensemble.iml
 
 target
 src/main/java/org/infinispan/ensemble/cache/distributed/partitioning/Coordinates.java
+ObjectStore
