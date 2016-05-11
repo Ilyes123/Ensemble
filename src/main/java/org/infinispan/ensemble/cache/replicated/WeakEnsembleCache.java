@@ -33,12 +33,17 @@ public class WeakEnsembleCache<K, V> extends ReplicatedEnsembleCache<K, V> {
 
     /**
      * Executes the script stored in SCRIPT_CACHE with s as a key
-     * on a random cache and returns its result
+     * on all caches and returns one of the results
      *
      */
     @Override
     public <T> T execute(String s, Map<String, ?> map) {
-        return someCache().execute(s, map);
+        EnsembleCache<K, V> cache = someCache();
+        for (EnsembleCache<K, V> c : caches) {
+            if (!c.equals(cache))
+                c.execute(s,map);
+        }
+        return cache.execute(s, map);
     }
 
     @Override
