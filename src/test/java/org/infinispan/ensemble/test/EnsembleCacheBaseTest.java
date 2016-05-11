@@ -89,15 +89,13 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
       String scriptName = "simple.js";
 
       Map<String,Integer> params = new HashMap<>();
-      params.put("multiplicand",1);
+      params.put("multiplicand",2);
       params.put("multiplier",5);
 
       EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
       scriptCache.put(scriptName,script);
-      List<Double> vector =  cache().execute(scriptName,params);
-      assert vector.size()==sites().size();
-      assert vector.get(0) == 5.0;
-
+      Double result =  cache().execute(scriptName,params);
+      assert result == 10.0;
    }
 
 

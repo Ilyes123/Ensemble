@@ -6,6 +6,12 @@ import org.infinispan.ensemble.test.EnsembleCacheBaseTest;
 import org.infinispan.ensemble.test.WebPage;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.infinispan.scripting.ScriptingManager.SCRIPT_CACHE;
+
 
 /**
  * @author Pierre Sutra
@@ -26,4 +32,5 @@ public class EnsembleReplicatedWeakCacheTest extends EnsembleCacheBaseTest {
     protected int numberOfSites() {
         return 3;
     }
+
 }

@@ -10,7 +10,11 @@ import org.infinispan.ensemble.test.WebPage;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.infinispan.scripting.ScriptingManager.SCRIPT_CACHE;
 
 /**
  * @author Pierre Sutra
@@ -63,6 +67,22 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
       else
          assert !cache.containsKey(page3.getKey());
 
+   }
+
+   @Test
+   public void doExecute(){
+      String script = "multiplicand  * multiplier ";
+      String scriptName = "simple.js";
+
+      Map<String,Integer> params = new HashMap<>();
+      params.put("multiplicand",1);
+      params.put("multiplier",5);
+
+      EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
+      scriptCache.put(scriptName,script);
+      List<Double> vector =  cache().execute(scriptName,params);
+      assert vector.size()==sites().size();
+      assert vector.get(0) == 5.0;
    }
 
    @Test

@@ -1,5 +1,6 @@
 package org.infinispan.ensemble.cache;
 
+import org.apache.avro.generic.GenericData;
 import org.infinispan.client.hotrod.*;
 import org.infinispan.commons.util.CloseableIterator;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
@@ -459,6 +460,11 @@ public abstract class EnsembleCache<K,V> implements RemoteCache<K,V>{
 
    @Override
    public <T> T execute(String s, Map<String, ?> map) {
+      /*List<T> result = new ArrayList<>();
+      for (EnsembleCache<K,V> cache : caches){
+         result.add((T)cache.execute(s,map));
+      }
+      return (T) result;*/
       throw new UnsupportedOperationException();
    }
 
