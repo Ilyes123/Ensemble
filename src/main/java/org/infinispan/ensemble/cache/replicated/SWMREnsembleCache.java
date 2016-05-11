@@ -71,6 +71,20 @@ public class SWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
     // WRITE
     //
 
+    /**
+     * Executes the provided script on 50%+1 of the caches
+     *
+     * @return Returns the value provided by the execution on the primary cache
+     */
+    @Override
+    public <T> T execute(String s, Map<String, ?> map) {
+        for(EnsembleCache cache: quorumCacheContaining(primary)) {
+            if(!cache.equals(primary))
+                cache.execute(s,map);
+        }
+        return primary.execute(s, map);
+    }
+
     @Override
     public V put(K key, V value) {
         V ret = primary.put(key, value);
