@@ -29,10 +29,17 @@ public abstract class ReplicatedEnsembleCache<K,V> extends EnsembleCache<K,V> {
       return caches.iterator().next();
    }
 
+   /**
+    *
+    * @return 50% + 1 of the caches count
+     */
    protected int quorumSize(){
       return (int)Math.floor((double)caches.size()/(double)2) +1;
    }
 
+   /**
+    * @return Returns a list counting quorumSize() of the caches
+     */
    protected Collection<EnsembleCache<K,V>> quorumCache(){
       List<EnsembleCache<K,V>> quorum = new ArrayList<EnsembleCache<K, V>>();
       for(int i=0; i< quorumSize(); i++){
@@ -42,6 +49,10 @@ public abstract class ReplicatedEnsembleCache<K,V> extends EnsembleCache<K,V> {
       return quorum;
    }
 
+   /**
+    * @param cache The returned list should contain cache
+    * @return Returns a list of quorumSize() caches including the provided parameter
+     */
    protected Collection<EnsembleCache<K,V>> quorumCacheContaining(EnsembleCache<K, V> cache){
       List<EnsembleCache<K,V>> quorum = new ArrayList<EnsembleCache<K, V>>();
       quorum.add(cache);
