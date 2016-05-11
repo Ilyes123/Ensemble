@@ -70,7 +70,7 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
    }
 
    @Test
-   public void doExecute(){
+   public void execution(){
       String script = "multiplicand  * multiplier ";
       String scriptName = "simple.js";
 
