@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 /**
  * @author Pierre Sutra
  */
-@Test(groups = "functional", testName = "EnsembleReplicatedSWMRCacheTest")
+@Test(groups = "functional", testName = "EnsembleReplicatedMWMRCacheTest")
 public class EnsembleReplicatedMWMRCacheTest extends EnsembleCacheBaseTest {
 
    private EnsembleCache<CharSequence,WebPage> cache;
@@ -19,7 +19,7 @@ public class EnsembleReplicatedMWMRCacheTest extends EnsembleCacheBaseTest {
    @Override
    protected synchronized EnsembleCache<CharSequence, WebPage> cache() {
       if (cache==null)
-         cache = getManager().getCache(cacheName,numberOfSites()/2, EnsembleCacheManager.Consistency.SWMR);
+         cache = getManager().getCache(cacheName,numberOfSites()/2, EnsembleCacheManager.Consistency.MWMR);
       return cache;
    }
 

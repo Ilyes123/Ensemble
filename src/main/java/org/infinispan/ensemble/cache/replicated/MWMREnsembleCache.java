@@ -18,6 +18,13 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
         super(name,caches);
     }
 
+    /* TODO : Synchronize all caches before executing the script */
+    /*@Override
+    public <T> T execute(String s, Map<String, ?> map) {
+
+        raise new UnsupportedException();
+    }*/
+
     @Override
     public V get(Object key) {
         Map<RemoteCache<K,V>, VersionedValue<V>> previous = previousValues((K)key);
