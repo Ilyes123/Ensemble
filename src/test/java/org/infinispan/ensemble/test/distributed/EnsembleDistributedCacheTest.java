@@ -1,22 +1,16 @@
 package org.infinispan.ensemble.test.distributed;
 
-import example.avro.WebPage;
-import org.infinispan.client.hotrod.RemoteCache;
-import org.infinispan.client.hotrod.RemoteCacheManager;
-import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.Site;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.cache.distributed.DistributedEnsembleCache;
 import org.infinispan.ensemble.cache.distributed.partitioning.HashBasedPartitioner;
 import org.infinispan.ensemble.cache.distributed.partitioning.Partitioner;
-import org.infinispan.ensemble.cache.replicated.ReplicatedEnsembleCache;
 import org.infinispan.ensemble.test.EnsembleCacheBaseTest;
+import org.infinispan.ensemble.test.WebPage;
 import org.testng.annotations.Test;
 
-import java.rmi.Remote;
-import java.util.*;
-
-import static org.infinispan.ensemble.EnsembleCacheManager.SCRIPT_CACHE;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Pierre Sutra
@@ -26,7 +20,7 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
 
    private DistributedEnsembleCache<CharSequence, WebPage> cache;
    private Partitioner<CharSequence, WebPage> partitioner;
-   private boolean frontierMode = true;
+   private boolean frontierMode = false;
 
    @Override
    protected synchronized EnsembleCache<CharSequence, WebPage> cache() {
@@ -72,54 +66,9 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
    }
 
    @Test
-   @Override
-   public void baseQuery() {
-      if (frontierMode && numberOfNodes()==1 && numberOfSites()==1)
-         super.baseQuery();
-   }
-
-  // @Test
-   @Override
-   public void pagination(){
-      if (frontierMode && numberOfNodes()==1 && numberOfSites()==1)
-         super.pagination();
-   }
-
-   @Test
-   @Override
-   public void update(){
-      if (!frontierMode)
+   public void update() {
+      if (frontierMode==false)
          super.update();
    }
-   
-   @Test
-   @Override
-   public void split() {
-      if (frontierMode && numberOfSites()==1)
-         super.split();
+
    }
-
-
-    @Test
-    public void execution(){
-        String script = "multiplicand  * multiplied ";
-        String scriptName = "script.js";
-
-        int i = 0;
-
-        Map<String,Integer> params = new HashMap<>();
-        params.put("multiplicand",i);
-        params.put("multiplier",i+5);
-
-        EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
-        scriptCache.put(scriptName,script);
-        Vector<Integer> vector =  cache.execute(script,params);
-        Integer num = 0;
-        for (Integer res : vector){
-            System.out.println("Resultat numero " + num + ":  " + res + "\n\n");
-            num++;
-        }
-
-    }
-
-}

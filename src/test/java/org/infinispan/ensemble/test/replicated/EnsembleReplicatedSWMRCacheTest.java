@@ -1,9 +1,9 @@
 package org.infinispan.ensemble.test.replicated;
 
-import example.avro.WebPage;
 import org.infinispan.ensemble.EnsembleCacheManager;
 import org.infinispan.ensemble.cache.EnsembleCache;
 import org.infinispan.ensemble.test.EnsembleCacheBaseTest;
+import org.infinispan.ensemble.test.WebPage;
 import org.testng.annotations.Test;
 
 
@@ -25,11 +25,6 @@ public class EnsembleReplicatedSWMRCacheTest extends EnsembleCacheBaseTest {
    @Override
    protected int numberOfSites() {
       return 3;
-   }
-
-   @Override
-   public void asyncBaseOperations() {
-      // FIXME
    }
 
 }

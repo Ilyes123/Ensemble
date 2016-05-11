@@ -11,6 +11,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.remoting.transport.Transport;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.test.MultipleCacheManagersTest;
+import org.infinispan.test.fwk.TestResourceTracker;
 import org.infinispan.test.fwk.TransportFlags;
 import org.infinispan.transaction.TransactionMode;
 import org.testng.annotations.AfterClass;
@@ -29,8 +30,8 @@ import static org.infinispan.test.TestingUtil.blockUntilCacheStatusAchieved;
 @Test(enabled = false)
 public class SimulationDriver extends MultipleCacheManagersTest implements Driver {
 
-   private int numberOfSites = 0;
-   private int numberOfNodes = 0 ;
+   private int numberOfSites = 1;
+   private int numberOfNodes = 1 ;
    private List<String> cacheNames = EMPTY_LIST;
    private List<HotRodServer> servers = new ArrayList<>();
    private List<String> sites = new ArrayList<>();
@@ -106,6 +107,8 @@ public class SimulationDriver extends MultipleCacheManagersTest implements Drive
 
    protected void createSites(int nsites, int nnodes, ConfigurationBuilder defaultBuilder) {
 
+      TestResourceTracker.testThreadStarted(this);
+
       // Start Hot Rod servers at each site.
       for (int i = 0; i < nsites; i++) {
          for (int j = 0; j < nnodes; j++) {
@@ -119,16 +122,10 @@ public class SimulationDriver extends MultipleCacheManagersTest implements Drive
 
       // Create appropriate caches at each node.
       ConfigurationBuilder builder = hotRodCacheConfiguration(getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false));
-      builder.indexing()
-            .enable()
-            .index(Index.LOCAL)
-            .addProperty("default.directory_provider", "ram")
-            .addProperty("hibernate.search.default.exclusive_index_use","true")
-            .addProperty("hibernate.search.default.indexmanager","near-real-time")
-            .addProperty("hibernate.search.default.indexwriter.ram_buffer_size","128")
-            .addProperty("lucene_version", "LUCENE_CURRENT");
+      builder.indexing().disable();
       builder.clustering().hash().numOwners(1);
       builder.jmxStatistics().enable();
+      builder.compatibility().disable();
       builder.transaction().transactionMode(TransactionMode.TRANSACTIONAL);
       Configuration configuration = builder.build();
       for (int i = 0; i < nsites; i++) {

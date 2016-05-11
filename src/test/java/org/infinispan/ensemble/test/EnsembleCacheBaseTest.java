@@ -1,22 +1,16 @@
 package org.infinispan.ensemble.test;
 
-import example.avro.WebPage;
-import org.infinispan.avro.client.Marshaller;
-import org.infinispan.avro.hotrod.QueryBuilder;
-import org.infinispan.avro.hotrod.RemoteQuery;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.ensemble.EnsembleCacheManager;
-import org.infinispan.ensemble.search.Search;
-import org.infinispan.query.dsl.Query;
-import org.infinispan.query.dsl.QueryFactory;
-import org.infinispan.query.dsl.SortOrder;
+import org.infinispan.ensemble.cache.EnsembleCache;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import static org.testng.Assert.assertEquals;
+import static org.infinispan.scripting.ScriptingManager.SCRIPT_CACHE;
 
 
 /**
@@ -26,6 +20,7 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
 
    public static final String cacheName = "WebPage";
 
+   private static Random rand = new Random(System.currentTimeMillis());
    private EnsembleCacheManager manager;
 
    @Override
@@ -43,10 +38,7 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
       if (manager==null) {
          synchronized (this) {
             if (manager==null)
-               manager = new EnsembleCacheManager(
-                     sites(),
-                     new Marshaller<>(valueClass())
-               );
+               manager = new EnsembleCacheManager(sites());
          }
       }
       return  manager;
@@ -54,7 +46,7 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
 
    @Override
    protected int numberOfSites() {
-      return 3;
+      return 2;
    }
 
    @Override
@@ -80,113 +72,34 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
    }
 
    @Test
-   public void asyncBaseOperations() {
-
-      final int PAGES=100;
-
-      List<NotifyingFuture<WebPage>> futures = new ArrayList<>();
-      for (int i=0; i<PAGES; i++) {
-         WebPage page = somePage();
-         futures.add(
-               cache().putIfAbsentAsync(page.getKey(), page));
-      }
-
-      for (NotifyingFuture<WebPage> future : futures) {
-         try {
-            AssertJUnit.assertEquals(null, future.get());
-         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-         }
-      }
-
-      AssertJUnit.assertEquals(PAGES,cache().size());
-   }
-
-   @Test
-   public void baseQuery(){
-      QueryFactory qf = Search.getQueryFactory(cache());
-
-      WebPage page1 = somePage();
-      cache().put(page1.getKey(),page1);
-      WebPage page2 = somePage();
-      cache().put(page2.getKey(),page2);
-
-      QueryBuilder qb = (QueryBuilder) qf.from(WebPage.class);
-      Query query = qb.build();
-      List list = query.list();
-      assertEquals(list.size(),2);
-
-      qb = (QueryBuilder) qf.from(WebPage.class);
-      qb.having("key").eq(page1.getKey());
-      query = qb.build();
-      assertEquals(query.list().get(0), page1);
-
-   }
-
-   // @Test
-   public void pagination() {
-
-      int NPAGES = 100;
-
-      Map<String, WebPage> added = new HashMap<>();
-      for(int i=0; i<NPAGES; i++) {
-         WebPage page = somePage();
-         cache().put(page.getKey(), page);
-         added.put(page.getKey().toString(), page);
-      }
-
-      QueryFactory qf = Search.getQueryFactory(cache());
-
-      Map<String, WebPage> retrieved = new HashMap<>();
-      for (int i=0; i< NPAGES; i++) {
-         Query query = qf.from(WebPage.class)
-               .maxResults(1)
-               .startOffset(i)
-               .orderBy("key", SortOrder.ASC)
-               .build();
-         assertEquals(query.list().size(),1);
-         WebPage page = (WebPage) query.list().get(0);
-         retrieved.put(page.getKey().toString(),page);
-      }
-
-      AssertJUnit.assertEquals(added.size(), retrieved.size());
-   }
-
-   @Test
    public void update(){
-      int NITERATIONS = 100;
-      WebPage page1 = somePage();
+      int NITERATIONS = 10;
       for (int i=0; i <NITERATIONS; i++){
          WebPage page = somePage();
-         cache().put(page1.getKey(),page);
-         WebPage page2 = cache().get(page1.getKey());
+         cache().put(page.getKey(),page);
+         WebPage page2 = cache().get(page.getKey());
          assert  page2!=null;
          assert page2.equals(page);
       }
    }
-   
-   
+
    @Test
-   public void split() {
-      int NPAGES = 100;
-      for (int i=0; i <NPAGES; i++){
-         WebPage page = somePage();
-         cache().put(page.getKey(),page);
-      }
-      
-      QueryFactory qf = Search.getQueryFactory(cache());
-      QueryBuilder qb = (QueryBuilder) qf.from(WebPage.class);
-      Query query = qb.build();
-      Collection<RemoteQuery> split = qb.split(query);
-      
-      Collection<WebPage> results = new ArrayList<>();
-      for (Query q : split) {
-         results.addAll(q.<WebPage>list());
-      }
-      
-      assertEquals(results.size(),NPAGES);
+   public void execution(){
+      String script = "multiplicand  * multiplier ";
+      String scriptName = "simple.js";
+
+      Map<String,Integer> params = new HashMap<>();
+      params.put("multiplicand",1);
+      params.put("multiplier",5);
+
+      EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
+      scriptCache.put(scriptName,script);
+      List<Double> vector =  cache().execute(scriptName,params);
+      assert vector.size()==sites().size();
+      assert vector.get(0) == 5.0;
 
    }
+
 
    // Helpers
 
@@ -198,7 +111,10 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
    }
 
    public static WebPage somePage(){
-      return WebPage.newBuilder().build();
+      WebPage page = new WebPage();
+      page.setKey("http://" + Long.toString(rand.nextLong()) + ".org/index.html");
+      page.setContent(ByteBuffer.allocate(100).array());
+      return page;
    }
 
 }

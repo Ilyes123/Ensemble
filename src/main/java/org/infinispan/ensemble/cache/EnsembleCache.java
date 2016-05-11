@@ -1,13 +1,18 @@
 package org.infinispan.ensemble.cache;
 
 import org.infinispan.client.hotrod.*;
+import org.infinispan.commons.util.CloseableIterator;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.ensemble.Site;
+import org.infinispan.query.dsl.Query;
 import org.infinispan.util.logging.Log;
 import org.infinispan.util.logging.LogFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 /**
@@ -91,6 +96,16 @@ public abstract class EnsembleCache<K,V> implements RemoteCache<K,V>{
    // WRITE
 
    @Override
+   public V getOrDefault(Object key, V defaultValue) {
+      return null;
+   }
+
+   @Override
+   public void forEach(BiConsumer<? super K, ? super V> action) {
+
+   }
+
+   @Override
    public V putIfAbsent(K k, V v) {
       throw new UnsupportedOperationException();
    }
@@ -108,6 +123,31 @@ public abstract class EnsembleCache<K,V> implements RemoteCache<K,V>{
    @Override
    public V replace(K k, V v) {
       throw new UnsupportedOperationException();
+   }
+
+   @Override
+   public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+
+   }
+
+   @Override
+   public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+      return null;
+   }
+
+   @Override
+   public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+      return null;
+   }
+
+   @Override
+   public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+      return null;
+   }
+
+   @Override
+   public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+      return null;
    }
 
    @Override
@@ -297,6 +337,11 @@ public abstract class EnsembleCache<K,V> implements RemoteCache<K,V>{
    }
 
    @Override
+   public boolean replaceWithVersion(K k, V v, long l, long l1, TimeUnit timeUnit, long l2, TimeUnit timeUnit1) {
+      return false;
+   }
+
+   @Override
    public NotifyingFuture<Boolean> replaceWithVersionAsync(K key, V newValue, long version) {
       throw new UnsupportedOperationException();
    }
@@ -311,6 +356,31 @@ public abstract class EnsembleCache<K,V> implements RemoteCache<K,V>{
    public NotifyingFuture<Boolean> replaceWithVersionAsync(K key, V newValue, long version,
          int lifespanSeconds, int maxIdleSeconds) {
       throw new UnsupportedOperationException();
+   }
+
+   @Override
+   public CloseableIterator<Entry<Object, Object>> retrieveEntries(String s, Set<Integer> set, int i) {
+      return null;
+   }
+
+   @Override
+   public CloseableIterator<Entry<Object, Object>> retrieveEntries(String s, Object[] objects, Set<Integer> set, int i) {
+      return null;
+   }
+
+   @Override
+   public CloseableIterator<Entry<Object, Object>> retrieveEntries(String s, int i) {
+      return null;
+   }
+
+   @Override
+   public CloseableIterator<Entry<Object, Object>> retrieveEntriesByQuery(Query query, Set<Integer> set, int i) {
+      return null;
+   }
+
+   @Override
+   public CloseableIterator<Entry<Object, MetadataValue<Object>>> retrieveEntriesWithMetadata(Set<Integer> set, int i) {
+      return null;
    }
 
    @Override
@@ -390,6 +460,11 @@ public abstract class EnsembleCache<K,V> implements RemoteCache<K,V>{
    @Override
    public <T> T execute(String s, Map<String, ?> map) {
       throw new UnsupportedOperationException();
+   }
+
+   @Override
+   public CacheTopologyInfo getCacheTopologyInfo() {
+      return null;
    }
 
    // LIFE CYCLE

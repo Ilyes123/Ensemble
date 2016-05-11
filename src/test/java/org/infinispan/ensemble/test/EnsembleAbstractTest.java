@@ -20,7 +20,7 @@ public abstract class EnsembleAbstractTest<K,T>{
 
    protected abstract int numberOfSites();
    protected abstract int numberOfNodes();
-   protected abstract Class<? extends GenericContainer> valueClass();
+   protected abstract Class<?> valueClass();
    protected abstract Class<? extends K> keyClass();
    protected abstract EnsembleCacheManager getManager();
    protected abstract EnsembleCache<K,T> cache();
@@ -35,8 +35,6 @@ public abstract class EnsembleAbstractTest<K,T>{
       driver.setCacheNames(cacheNames());
       driver.createSites();
 
-      for (String cacheName : cacheNames())
-         getManager().loadSchema(valueClass().newInstance().getSchema());
    }
 
    @AfterMethod(alwaysRun = true)
