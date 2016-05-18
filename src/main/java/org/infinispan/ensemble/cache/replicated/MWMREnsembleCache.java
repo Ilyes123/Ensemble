@@ -18,13 +18,22 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
         super(name,caches);
     }
 
-    /* TODO : Synchronize all caches before executing the script */
-    /*@Override
-    public <T> T execute(String s, Map<String, ?> map) {
-
-        raise new UnsupportedException();
-    }*/
-
+    /**
+     * Executes the script stored at SCRIPT_CACHE having as key the
+     * provided parameter on all the caches
+     * @param script the key of the script to be executed in SCRIPT_CACHE
+     * @param map parameters provided for the script
+     * @param <T>
+     * @return one of the results of the executions on all the caches
+     */
+    @Override
+    public <T> T execute(String script, Map<String,?> map) {
+        T ret = null ;
+        for (EnsembleCache cache : caches) {
+            ret = (T) cache.execute(script, map);
+        }
+        return ret;
+    }
     @Override
     public V get(Object key) {
         Map<RemoteCache<K,V>, VersionedValue<V>> previous = previousValues((K)key);
