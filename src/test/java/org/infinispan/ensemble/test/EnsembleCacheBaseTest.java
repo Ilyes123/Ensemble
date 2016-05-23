@@ -18,7 +18,7 @@ import static org.infinispan.scripting.ScriptingManager.SCRIPT_CACHE;
  */
 public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSequence, WebPage> {
 
-   public static final String cacheName = "WebPage";
+   public static final String cacheName = EnsembleCacheManager.DEFAULT_CACHE_NAME;
 
    private static Random rand = new Random(System.currentTimeMillis());
    private EnsembleCacheManager manager;
