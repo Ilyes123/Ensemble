@@ -52,7 +52,7 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
 
 
       // putIfAbsent
-      for(int i=0; i<1000; i++){
+      for(int i=0; i<10; i++){
          page2 = somePage();
          cache().putIfAbsent(page1.getKey(), page2);
       }

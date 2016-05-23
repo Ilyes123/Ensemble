@@ -1,6 +1,5 @@
 package org.infinispan.ensemble.cache.replicated;
 
-import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.VersionedValue;
 import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.ensemble.cache.EnsembleCache;
@@ -18,25 +17,9 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
         super(name,caches);
     }
 
-    /**
-     * Executes the script stored at SCRIPT_CACHE having as key the
-     * provided parameter on all the caches
-     * @param script the key of the script to be executed in SCRIPT_CACHE
-     * @param map parameters provided for the script
-     * @param <T>
-     * @return one of the results of the executions on all the caches
-     */
-    @Override
-    public <T> T execute(String script, Map<String,?> map) {
-        T ret = null ;
-        for (EnsembleCache cache : caches) {
-            ret = (T) cache.execute(script, map);
-        }
-        return ret;
-    }
     @Override
     public V get(Object key) {
-        Map<RemoteCache<K,V>, VersionedValue<V>> previous = previousValues((K)key);
+        Map<EnsembleCache<K,V>, VersionedValue<V>> previous = previousValues((K)key);
         VersionedValue<V> g = greatestValue(previous);
         if(g.getValue()==null)
             return null;
@@ -47,9 +30,9 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
 
     @Override
     public V put(K key, V value) {
-        Map<RemoteCache<K,V>, VersionedValue<V>> previous = previousValues(key);
+        Map<EnsembleCache<K,V>, VersionedValue<V>> previous = previousValues(key);
         VersionedValue<V> g = greatestValue(previous);
-        writeStable(key, value, g.getVersion(), previous.keySet());
+        writeStable(key, value, g.getVersion()+1, previous.keySet());
         if(g.getValue()!=null)
             return g.getValue();
         return null;
@@ -57,10 +40,10 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
 
     @Override
     public V putIfAbsent(K key, V value) {
-        Map<RemoteCache<K,V>, VersionedValue<V>> previous = previousValues(key);
+        Map<EnsembleCache<K,V>, VersionedValue<V>> previous = previousValues(key);
         VersionedValue<V> g = greatestValue(previous);
         if (g.getVersion()==0) {
-            writeStable(key, value, g.getVersion(), previous.keySet());
+            writeStable(key, value, g.getVersion()+1, previous.keySet());
             if (g.getValue() != null)
                 return g.getValue();
             return null;
@@ -72,9 +55,9 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
     // HELPERS
     //
 
-    private void writeStable(K key, V value, long version, Set<RemoteCache<K, V>> caches) {
-        List<NotifyingFuture<Boolean>> futures = new ArrayList<NotifyingFuture<Boolean>>();
-        for(RemoteCache<K,V> c : caches) {
+    private void writeStable(K key, V value, long version, Set<EnsembleCache<K, V>> caches) {
+        List<NotifyingFuture<Boolean>> futures = new ArrayList<>();
+        for(EnsembleCache<K,V> c : caches) {
             futures.add(c.replaceWithVersionAsync(key, value, version));
         }
         for(NotifyingFuture<Boolean> future : futures){
@@ -87,8 +70,8 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
 
     }
 
-    private Map<RemoteCache<K,V>, VersionedValue<V>> previousValues(K k){
-        Map<RemoteCache<K,V>,VersionedValue<V>> values = new HashMap<>();
+    private Map<EnsembleCache<K,V>, VersionedValue<V>> previousValues(K k){
+        Map<EnsembleCache<K,V>,VersionedValue<V>> values = new HashMap<>();
         for(EnsembleCache<K,V> cache : quorumCache()){
             try {
                 values.put(
@@ -98,15 +81,15 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
                 e.printStackTrace();
             }
         }
-        Map<RemoteCache<K,V>, VersionedValue<V>> ret = new HashMap<>();
-        for(RemoteCache<K,V> cache : values.keySet()){
+        Map<EnsembleCache<K,V>, VersionedValue<V>> ret = new HashMap<>();
+        for(EnsembleCache<K,V> cache : values.keySet()){
             VersionedValue<V> tmp = values.get(cache);
             ret.put(cache,tmp);
         }
         return ret;
     }
 
-    private boolean isStable(Map<RemoteCache<K, V>, VersionedValue<V>> map, VersionedValue<V> v){
+    private boolean isStable(Map<EnsembleCache<K, V>, VersionedValue<V>> map, VersionedValue<V> v){
         int count = 0;
         if(v==null) return true;
         for(VersionedValue<V> w: map.values()){
@@ -116,7 +99,7 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
         return count >= quorumSize();
     }
 
-    private VersionedValue<V> greatestValue(Map<RemoteCache<K,V>,VersionedValue<V>> map){
+    private VersionedValue<V> greatestValue(Map<EnsembleCache<K,V>,VersionedValue<V>> map){
         VersionedValue<V> ret = new VersionedValue<V>() {
             @Override
             public long getVersion() {
@@ -125,7 +108,7 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
 
             @Override
             public V getValue() {
-                return null;  // TODO: Customise this generated block
+                return null;
             }
         };
         for(VersionedValue<V> v: map.values()){
