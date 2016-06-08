@@ -26,6 +26,14 @@ public class EnsembleDistributedCacheTest extends EnsembleCacheBaseTest {
    private Partitioner<CharSequence, WebPage> partitioner;
    private boolean frontierMode = false;
 
+   /*code ajouté*/
+
+
+
+
+   /**/
+
+
    @Override
    protected synchronized EnsembleCache<CharSequence, WebPage> cache() {
       if (cache == null) {

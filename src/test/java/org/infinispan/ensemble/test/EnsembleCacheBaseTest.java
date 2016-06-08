@@ -54,6 +54,50 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
       return 1;
    }
 
+
+   @Test
+   public void piCalculation(){
+      String script = "function piApprox() {\n" +
+              "    var i = 0;" +
+              "    var inside = 0;\n" +
+              "    var all = 0;\n" +
+              "    while (i<nbPoints) {\n" +
+              "        var x = Math.random();\n" +
+              "        var y = Math.random();\n" +
+              "        var distance = Math.sqrt(x * x + y * y);\n" +
+              "        all++;\n" +
+              "        if (distance < 1) {\n" +
+              "            inside++;\n" +
+              "        }\n" +
+              "        i++;\n" +
+              "    }\n" +
+              "    var approximation= 4 * (inside / all);\n" +
+              "    return approximation;\n" +
+              "}\n" +
+              "piApprox()";
+
+      String scriptName = "monteCarlo.js";
+
+      Map<String,Integer> params = new HashMap<>();
+      params.put("nbPoints",1000000);
+
+      EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
+      scriptCache.put(scriptName,script);
+      List<Double> vector =  cache().execute(scriptName,params);
+
+      Double pi = new Double(0);
+
+      for (Double d:vector){
+         pi += d;
+
+      }
+      System.out.println("the value of pi is " + pi +" " + cache().getCaches().size());
+      pi = pi / cache().getCaches().size();
+
+      System.out.println("the value of pi is " + pi);
+      assert(pi>3.10 && pi<3.20);
+   }
+
    @Test
    public void baseCacheOperations() {
       WebPage page1 = somePage();
@@ -95,6 +139,7 @@ public abstract class EnsembleCacheBaseTest extends EnsembleAbstractTest<CharSeq
       EnsembleCache scriptCache = getManager().getCache(SCRIPT_CACHE);
       scriptCache.put(scriptName,script);
       Double result =  cache().execute(scriptName,params);
+      System.out.println(result);
       assert result == 10.0;
    }
 
