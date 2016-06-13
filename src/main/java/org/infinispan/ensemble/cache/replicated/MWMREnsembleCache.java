@@ -18,6 +18,15 @@ public class MWMREnsembleCache<K,V> extends ReplicatedEnsembleCache<K,V> {
     }
 
     @Override
+    public <T> T execute(String s, Map<String, ?> map) {
+        T ret = null;
+        for (EnsembleCache<K,V> cache : caches){
+         ret = cache.execute(s,map);
+        }
+        return ret;
+    }
+
+    @Override
     public V get(Object key) {
         Map<EnsembleCache<K,V>, VersionedValue<V>> previous = previousValues((K)key);
         VersionedValue<V> g = greatestValue(previous);
